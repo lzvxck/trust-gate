@@ -41,7 +41,8 @@ Pin a specific released version rather than `latest`:
 TRUST_GATE_IMAGE_TAG=v0.1.0 docker compose -f deploy/docker-compose.prod.yml up -d
 ```
 
-First time only: GHCR packages default to **private** even on a public repo — after
-the first push, go to the package's page on GitHub (from the repo sidebar, or
-`github.com/lzvxck/trust-gate/pkgs/container/trust-gate-backend`) and set visibility
-to Public, or `docker pull` will fail with an auth error for anyone who isn't you.
+GHCR packages published from a public repo inherit its visibility automatically —
+confirmed by pulling `ghcr.io/lzvxck/trust-gate-backend` with no `docker login` at
+all. No manual visibility step needed. (If you fork this into a private repo, the
+published packages will be private too — check
+`github.com/<you>/trust-gate/pkgs/container/trust-gate-backend` if a pull ever 401s.)
