@@ -8,9 +8,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test --pass-with-no-tests"
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\""
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "@vitest/coverage-v8": "3.2.4",
+    "typescript": "^5.7.3",
+    "vitest": "3.2.4"
   }
 }

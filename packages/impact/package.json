@@ -8,13 +8,17 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test --pass-with-no-tests"
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\""
   },
   "dependencies": {
     "@trust-gate/core-graph": "workspace:*",
     "@trust-gate/coverage-map": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "@trust-gate/test-runner": "workspace:*",
+    "@vitest/coverage-v8": "3.2.4",
+    "ts-morph": "^24.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "3.2.4"
   }
 }

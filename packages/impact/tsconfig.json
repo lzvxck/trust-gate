@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
+    "outDir": "dist"
   },
-  "include": ["src"],
-  "references": [{ "path": "../core-graph" }, { "path": "../coverage-map" }]
+  "include": ["src"]
 }

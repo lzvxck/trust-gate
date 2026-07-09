@@ -16,6 +16,11 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true
+    "paths": {
+      "@trust-gate/core-graph": ["./packages/core-graph/src/index.ts"],
+      "@trust-gate/coverage-map": ["./packages/coverage-map/src/index.ts"],
+      "@trust-gate/impact": ["./packages/impact/src/index.ts"],
+      "@trust-gate/test-runner": ["./packages/test-runner/src/index.ts"]
+    }
   }
 }
