@@ -27,5 +27,16 @@
       "semicolons": "always",
       "trailingCommas": "all"
     }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/dashboard/**"],
+      "linter": {
+        "domains": { "next": "recommended", "react": "recommended" }
+      }
+    }
+  ],
+  "css": {
+    "parser": { "tailwindDirectives": true }
   }
 }

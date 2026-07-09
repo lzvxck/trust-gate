@@ -17,3 +17,6 @@ trust-gate-mvp-plan-v2.md
 PROGRESS.md
 *.pem
 .playwright-mcp/
+/*.png
+/*.jpg
+/*.jpeg
