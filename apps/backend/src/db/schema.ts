@@ -110,6 +110,22 @@ export const judgeResults = pgTable('judge_results', {
   model: text('model').notNull(),
 });
 
+/**
+ * Bridges the webhook path's checks.create (fired at PR open/sync, before any test
+ * results exist) to the later /runs POST from the Actions workflow that actually ran
+ * check_regression -- keyed on (repo, head_sha) so the analyze worker can find the
+ * pending check run to checks.update once a verdict lands.
+ */
+export const githubChecks = pgTable('github_checks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  repoId: uuid('repo_id')
+    .notNull()
+    .references(() => repos.id, { onDelete: 'cascade' }),
+  headSha: text('head_sha').notNull(),
+  checkRunId: text('check_run_id').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const coverageCache = pgTable('coverage_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
   repoId: uuid('repo_id')
@@ -123,6 +139,7 @@ export const coverageCache = pgTable('coverage_cache', {
 export const reposRelations = relations(repos, ({ many }) => ({
   runs: many(runs),
   coverageCache: many(coverageCache),
+  githubChecks: many(githubChecks),
 }));
 
 export const runsRelations = relations(runs, ({ one, many }) => ({
@@ -161,4 +178,8 @@ export const judgeResultsRelations = relations(judgeResults, ({ one }) => ({
 
 export const coverageCacheRelations = relations(coverageCache, ({ one }) => ({
   repo: one(repos, { fields: [coverageCache.repoId], references: [repos.id] }),
+}));
+
+export const githubChecksRelations = relations(githubChecks, ({ one }) => ({
+  repo: one(repos, { fields: [githubChecks.repoId], references: [repos.id] }),
 }));

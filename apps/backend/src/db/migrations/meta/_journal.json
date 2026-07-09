@@ -15,6 +15,13 @@
       "when": 1783566526619,
       "tag": "0001_polite_supreme_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783617337193,
+      "tag": "0002_narrow_skullbuster",
+      "breakpoints": true
     }
   ]
 }

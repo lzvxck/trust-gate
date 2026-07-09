@@ -11,4 +11,7 @@ export const env = {
   HOST: process.env.HOST ?? '0.0.0.0',
   RUNS_API_TOKEN: required('RUNS_API_TOKEN'),
   NODE_ENV: process.env.NODE_ENV ?? 'development',
+  GITHUB_APP_ID: required('GITHUB_APP_ID'),
+  GITHUB_APP_PRIVATE_KEY_PATH: required('GITHUB_APP_PRIVATE_KEY_PATH'),
+  GITHUB_WEBHOOK_SECRET: required('GITHUB_WEBHOOK_SECRET'),
 };

@@ -4,6 +4,7 @@ import { env } from './env.js';
 import { mcpHandler } from './mcp/route.js';
 import { mountBullBoard } from './queue/board.js';
 import { registerRunsRoute } from './routes/runs.js';
+import { registerGithubWebhookRoute } from './webhooks/route.js';
 
 export async function buildServer() {
   const app = Fastify({ logger: true });
@@ -11,6 +12,7 @@ export async function buildServer() {
   app.get('/healthz', async () => ({ status: 'ok' }));
 
   registerRunsRoute(app);
+  registerGithubWebhookRoute(app);
   app.post('/mcp', { preHandler: requireBearerToken }, mcpHandler);
 
   if (env.NODE_ENV !== 'production') {

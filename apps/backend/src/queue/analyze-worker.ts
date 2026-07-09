@@ -3,6 +3,7 @@ import { Worker } from 'bullmq';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { regressionEvents, runs } from '../db/schema.js';
+import { updateCheckForRun } from '../github/checks.js';
 import { connection } from './connection.js';
 
 interface AnalyzeJobData {
@@ -48,6 +49,7 @@ export function startAnalyzeWorker(): Worker<AnalyzeJobData> {
             ? 'fail'
             : 'pass';
       await db.update(runs).set({ status }).where(eq(runs.id, runId));
+      await updateCheckForRun(run.repoId, run.headSha, status, verdict);
     },
     { connection },
   );
