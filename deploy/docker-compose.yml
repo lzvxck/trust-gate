@@ -29,6 +29,45 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: ..
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../apps/backend/.env
+    environment:
+      DATABASE_URL: postgres://trustgate:trustgate@postgres:5432/trustgate
+      REDIS_URL: redis://redis:6379
+      GITHUB_APP_PRIVATE_KEY_PATH: apps/backend/secrets/github-app-private-key.pem
+    ports:
+      - '3001:3001'
+    volumes:
+      - ../apps/backend/secrets:/app/apps/backend/secrets:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: apps/dashboard/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../apps/dashboard/.env
+    environment:
+      DATABASE_URL: postgres://trustgate:trustgate@postgres:5432/trustgate
+      BACKEND_URL: http://backend:3001
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
 volumes:
   postgres-data:
   redis-data:

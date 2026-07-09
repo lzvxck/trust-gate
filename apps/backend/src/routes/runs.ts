@@ -1,8 +1,20 @@
 import type { RegressionVerdict } from '@trust-gate/orchestrator';
+import { desc, eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { requireBearerToken } from '../auth.js';
+import { db } from '../db/client.js';
 import { ingestRun } from '../db/ingest-run.js';
+import { repos, runs } from '../db/schema.js';
 import { enqueueAnalyze } from '../queue/queues.js';
+
+const DEFAULT_LIST_LIMIT = 20;
+const MAX_LIST_LIMIT = 100;
+
+interface ListRunsQuery {
+  repoId?: string;
+  limit?: string;
+  offset?: string;
+}
 
 interface RunRequestBody {
   repoFullName: string;
@@ -90,6 +102,69 @@ export function registerRunsRoute(app: FastifyInstance): void {
       await enqueueAnalyze(runId);
 
       return reply.code(201).send({ runId });
+    },
+  );
+
+  app.get<{ Querystring: ListRunsQuery }>(
+    '/runs',
+    { preHandler: requireBearerToken },
+    async (request, reply) => {
+      const { repoId, limit: limitParam, offset: offsetParam } = request.query;
+      const limit = Math.min(Number(limitParam) || DEFAULT_LIST_LIMIT, MAX_LIST_LIMIT);
+      const offset = Number(offsetParam) || 0;
+
+      const rows = await db
+        .select({
+          id: runs.id,
+          repoId: runs.repoId,
+          repoFullName: repos.fullName,
+          headSha: runs.headSha,
+          baseSha: runs.baseSha,
+          source: runs.source,
+          status: runs.status,
+          verdict: runs.verdict,
+          createdAt: runs.createdAt,
+        })
+        .from(runs)
+        .innerJoin(repos, eq(runs.repoId, repos.id))
+        .where(repoId ? eq(runs.repoId, repoId) : undefined)
+        .orderBy(desc(runs.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      const items = rows.map(({ verdict, ...rest }) => {
+        const v = verdict as RegressionVerdict | null;
+        return {
+          ...rest,
+          passToPassFailures: v?.passToPassFailures.length ?? 0,
+          newFailures: v?.newFailures.length ?? 0,
+        };
+      });
+
+      return reply.send({ runs: items, limit, offset });
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
+    '/runs/:id',
+    { preHandler: requireBearerToken },
+    async (request, reply) => {
+      const run = await db.query.runs.findFirst({
+        where: eq(runs.id, request.params.id),
+        with: {
+          repo: true,
+          trajectories: true,
+          impactEdges: true,
+          atRiskTests: true,
+          testResults: true,
+          judgeResults: true,
+          regressionEvents: true,
+        },
+      });
+
+      if (!run) return reply.code(404).send({ error: 'Run not found' });
+
+      return reply.send({ run });
     },
   );
 }

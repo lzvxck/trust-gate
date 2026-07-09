@@ -3,6 +3,7 @@ import { requireBearerToken } from './auth.js';
 import { env } from './env.js';
 import { mcpHandler } from './mcp/route.js';
 import { mountBullBoard } from './queue/board.js';
+import { registerReposRoute } from './routes/repos.js';
 import { registerRunsRoute } from './routes/runs.js';
 import { registerGithubWebhookRoute } from './webhooks/route.js';
 
@@ -12,6 +13,7 @@ export async function buildServer() {
   app.get('/healthz', async () => ({ status: 'ok' }));
 
   registerRunsRoute(app);
+  registerReposRoute(app);
   registerGithubWebhookRoute(app);
   app.post('/mcp', { preHandler: requireBearerToken }, mcpHandler);
 
