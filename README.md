@@ -1,5 +1,9 @@
 # Trust Gate
 
+[![CI](https://github.com/lzvxck/trust-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/lzvxck/trust-gate/actions/workflows/ci.yml)
+[![Publish Docker images](https://github.com/lzvxck/trust-gate/actions/workflows/publish-images.yml/badge.svg)](https://github.com/lzvxck/trust-gate/actions/workflows/publish-images.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+
 Trajectory-aware regression gate for autonomous coding agents.
 
 Agents touch code all over a codebase, and "run the tests near the changed files" tooling
