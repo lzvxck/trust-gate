@@ -1,0 +1,28 @@
+# Example: how a consuming repo wires up Trust Gate's PR-path regression check.
+#
+# This file is NOT executed by trust-gate's own CI -- it lives outside
+# .github/workflows/ deliberately, as documentation to copy into a *different*
+# repo's .github/workflows/. It calls the reusable workflow defined at
+# .github/workflows/regression-check.yml in this repo.
+#
+# Why not dogfood this on trust-gate itself? trust-gate's own test suite runs on
+# `bun test` (bun:test imports), but @trust-gate/coverage-map and @trust-gate/test-runner
+# specifically shell out to `vitest` -- that's the test runner Trust Gate is built to
+# gate for target repos, not what this monorepo uses for itself. Wiring this workflow
+# onto trust-gate's own PRs today would just no-op or error, not demonstrate anything
+# real. Once there's a small vitest-based demo/seed repo (tracked as a follow-up), point
+# base-ref/secrets at that instead to get a real "check turns red" milestone.
+
+name: Trust Gate Regression Check
+
+on:
+  pull_request:
+
+jobs:
+  trust-gate:
+    uses: lzvxck/trust-gate/.github/workflows/regression-check.yml@main
+    with:
+      base-ref: ${{ github.event.pull_request.base.ref }}
+    secrets:
+      backend-url: ${{ secrets.TRUST_GATE_BACKEND_URL }}
+      api-token: ${{ secrets.TRUST_GATE_API_TOKEN }}

@@ -9,6 +9,8 @@ interface RunRequestBody {
   headSha: string;
   baseSha: string;
   verdict: RegressionVerdict;
+  /** 'agent' = local CLI/MCP path, 'pr' = CI/Actions path. Defaults to 'agent'. */
+  source?: 'agent' | 'pr';
   trajectory?: {
     agent: string;
     toolCalls?: unknown[];
@@ -55,6 +57,7 @@ const runBodySchema = {
         errorMessage: { type: 'string' },
       },
     },
+    source: { type: 'string', enum: ['agent', 'pr'] },
     trajectory: {
       type: 'object',
       required: ['agent'],
@@ -73,13 +76,14 @@ export function registerRunsRoute(app: FastifyInstance): void {
     '/runs',
     { preHandler: requireBearerToken, schema: { body: runBodySchema } },
     async (request, reply) => {
-      const { repoFullName, headSha, baseSha, verdict, trajectory } = request.body;
+      const { repoFullName, headSha, baseSha, verdict, source, trajectory } = request.body;
 
       const { runId } = await ingestRun({
         repoFullName,
         headSha,
         baseSha,
         verdict,
+        ...(source ? { source } : {}),
         ...(trajectory ? { trajectory } : {}),
       });
       await enqueueAnalyze(runId);

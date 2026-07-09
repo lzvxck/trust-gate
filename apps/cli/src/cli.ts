@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-export {};
+import { report } from './report.js';
 
 const command = process.argv[2];
 
@@ -9,8 +9,11 @@ if (command === 'mcp') {
   // at typecheck time even though it exists at runtime after the build.
   const stdioEntry = '../dist/stdio.js';
   await import(stdioEntry);
+} else if (command === 'report') {
+  process.exitCode = await report(process.argv.slice(3));
 } else {
-  console.log('Usage: trust-gate mcp');
-  console.log('  Starts the trust-gate MCP stdio server for the current tool calls.');
+  console.log('Usage: trust-gate <mcp|report>');
+  console.log('  mcp     Starts the trust-gate MCP stdio server for the current tool calls.');
+  console.log('  report  Runs check_regression and optionally posts the verdict to a backend.');
   process.exitCode = command ? 1 : 0;
 }

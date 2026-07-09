@@ -1,0 +1,110 @@
+name: Trust Gate Regression Check
+
+# Reusable workflow (plan §5/§8, "PR path" of the two entry paths): a customer repo
+# calls this via `uses:` on their own `pull_request` trigger. It checks out the target
+# repo (needs full history -- @trust-gate/orchestrator does a real `git diff`/`git
+# stash` against baseRef, not a shallow single-commit checkout) alongside a copy of
+# this trust-gate repo, builds the CLI, and runs `trust-gate report`, which runs
+# check_regression and (if backend-url/api-token secrets are set) POSTs the verdict to
+# `/runs`. The job's own exit code is the gate for now (red check on regression) --
+# Checks API annotations are a later increment (see PROGRESS.md); this already
+# satisfies "open a PR -> check turns red on a real pass-to-pass regression" using
+# GitHub's native required-status-checks.
+#
+# trust-gate isn't published to npm yet (deferred, see PROGRESS.md), so the only way
+# to run it from another repo today is to check out this repo's source and build it --
+# once `trust-gate` is on npm this can collapse to a single `npx trust-gate report`.
+# See deploy/github-actions/example-caller.yml for how a consuming repo wires this up.
+
+on:
+  workflow_call:
+    inputs:
+      base-ref:
+        description: Branch name to diff against (e.g. the PR base branch, "main").
+        required: true
+        type: string
+      trust-gate-repository:
+        description: Which repo to pull the trust-gate engine from.
+        required: false
+        type: string
+        default: lzvxck/trust-gate
+      trust-gate-ref:
+        description: Git ref (branch, tag, or SHA) of trust-gate-repository to run.
+        required: false
+        type: string
+        default: main
+      max-tests:
+        description: Cap on at-risk tests actually executed (ignored on full-suite fallback).
+        required: false
+        type: number
+        default: 20
+    secrets:
+      backend-url:
+        description: Optional -- base URL of a self-hosted trust-gate backend. Omit to run the check without reporting to a dashboard.
+        required: false
+      api-token:
+        description: Bearer token matching the backend's RUNS_API_TOKEN. Required if backend-url is set.
+        required: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          path: target
+          fetch-depth: 0
+
+      - name: Checkout trust-gate
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.trust-gate-repository }}
+          ref: ${{ inputs.trust-gate-ref }}
+          path: trust-gate
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install trust-gate dependencies
+        working-directory: trust-gate
+        run: bun install --frozen-lockfile
+
+      - name: Build trust-gate CLI
+        working-directory: trust-gate
+        run: bun run --cwd apps/cli build
+
+      - name: Install target repo dependencies
+        working-directory: target
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+          elif [ -f bun.lock ] || [ -f bun.lockb ]; then
+            npm install -g bun
+            bun install --frozen-lockfile
+          else
+            npm install
+          fi
+
+      - name: Fetch base ref
+        working-directory: target
+        run: git fetch origin "${{ inputs.base-ref }}" --depth=1
+
+      - name: check_regression
+        working-directory: target
+        env:
+          TRUST_GATE_BACKEND_URL: ${{ secrets.backend-url }}
+          TRUST_GATE_API_TOKEN: ${{ secrets.api-token }}
+        run: |
+          node ../trust-gate/apps/cli/dist-cli/cli.js report \
+            --base-ref "origin/${{ inputs.base-ref }}" \
+            --max-tests "${{ inputs.max-tests }}" \
+            --source pr

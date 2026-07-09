@@ -1,4 +1,16 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Clears tsconfig.base.json's workspace `paths` (which point straight at sibling
+    // packages' .ts source). Left in place, tsc would pull that source into *this*
+    // compilation and infer a repo-root-wide rootDir, scattering the emitted output
+    // under dist-cli/apps/cli/src/... and dist-cli/packages/... instead of a flat
+    // dist-cli/cli.js -- breaking the package.json `bin` path and cli.ts's own
+    // `../dist/stdio.js` relative import. Falling through to plain node_modules
+    // resolution instead picks up @trust-gate/orchestrator's built dist/ output
+    // (its package.json main/types), which is already required to exist before this
+    // runs (apps/cli's `prebuild` script builds every workspace dependency first).
+    "paths": {}
+  },
   "include": ["src/cli.ts"]
 }

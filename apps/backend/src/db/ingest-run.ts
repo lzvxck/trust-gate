@@ -14,6 +14,8 @@ export interface IngestRunInput {
   headSha: string;
   baseSha: string;
   verdict: RegressionVerdict;
+  /** 'agent' = local CLI/MCP path, 'pr' = CI/Actions path. Defaults to 'agent'. */
+  source?: 'agent' | 'pr';
   trajectory?: TrajectoryInput;
 }
 
@@ -38,7 +40,7 @@ function wasPassingBefore(
 
 /** Transactional multi-table insert for a single run. Normalized tables are the source of truth; verdict_jsonb is kept as a debug/backup blob. */
 export async function ingestRun(input: IngestRunInput): Promise<{ runId: string }> {
-  const { repoFullName, headSha, baseSha, verdict, trajectory } = input;
+  const { repoFullName, headSha, baseSha, verdict, source = 'agent', trajectory } = input;
 
   return db.transaction(async (tx) => {
     const [repo] = await tx
@@ -54,7 +56,7 @@ export async function ingestRun(input: IngestRunInput): Promise<{ runId: string 
         repoId: repo.id,
         headSha,
         baseSha,
-        source: 'agent',
+        source,
         status: 'queued',
         verdict,
       })
