@@ -12,7 +12,13 @@ const execFile = promisify(execFileCb);
 // resolveVitestBin's walk-up-the-tree search finds this monorepo's installed
 // vitest -- an isolated OS-tmp repo wouldn't have a node_modules to find.
 // tmp-* is gitignored; always cleaned up in afterEach regardless of pass/fail.
+// __fixtures__ itself is never committed either (git doesn't track empty
+// directories), so a fresh checkout doesn't have it -- mkdtemp requires its
+// parent to already exist, it won't create one. Without this, every CI run
+// failed with ENOENT; local runs only "passed" because this directory already
+// existed on disk from earlier local test runs.
 const fixturesRoot = fileURLToPath(new URL('./__fixtures__', import.meta.url));
+await mkdir(fixturesRoot, { recursive: true });
 
 let repoRoot: string | undefined;
 
