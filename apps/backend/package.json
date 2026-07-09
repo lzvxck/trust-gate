@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "bun test --pass-with-no-tests",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "bun src/db/migrate.ts"
+    "db:migrate": "bun src/db/migrate.ts",
+    "judge:calibrate": "bun src/judge/calibrate.ts"
   },
   "dependencies": {
     "@bull-board/api": "^6.7.10",

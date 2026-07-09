@@ -3,8 +3,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { judgeResults, runs, trajectories } from '../db/schema.js';
 import { env } from '../env.js';
-import { getJudgeClient } from './client.js';
-import { buildJudgePrompt, CRITERIA, judgeResponseSchema } from './rubric.js';
+import { CRITERIA } from './rubric.js';
+import { scoreDiff } from './score-diff.js';
 
 /**
  * Runs the LLM-judge pipeline for a run and inserts one judge_results row per
@@ -30,27 +30,12 @@ export async function runJudge(runId: string): Promise<void> {
   const verdict = run.verdict as RegressionVerdict;
   if (!verdict.diff || verdict.diff.trim() === '') return;
 
-  const { system, user } = buildJudgePrompt({
+  const parsed = await scoreDiff({
     reasoningText: trajectory.reasoningText,
     diff: verdict.diff,
     atRiskTests: verdict.blast.atRiskTests,
     verdictStatus: verdict.status,
   });
-
-  const client = getJudgeClient();
-  const completion = await client.chat.completions.create({
-    model: env.GROQ_MODEL,
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: system },
-      { role: 'user', content: user },
-    ],
-  });
-
-  const raw = completion.choices[0]?.message?.content;
-  if (!raw) throw new Error(`Judge response for run ${runId} had no content`);
-
-  const parsed = judgeResponseSchema.parse(JSON.parse(raw));
 
   await db.insert(judgeResults).values(
     CRITERIA.map((c) => ({
