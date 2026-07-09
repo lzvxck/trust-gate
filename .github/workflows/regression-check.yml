@@ -94,9 +94,31 @@ jobs:
             npm install
           fi
 
-      - name: Fetch base ref
+      - name: Capture PR head SHA
+        id: head-sha
         working-directory: target
-        run: git fetch origin "${{ inputs.base-ref }}" --depth=1
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Rebase PR diff onto an uncommitted change against base-ref
+        working-directory: target
+        # @trust-gate/orchestrator's stashAndRun compares by stashing *uncommitted*
+        # changes, running against the clean tree, then restoring them -- built for the
+        # local agent path, where a diff really is uncommitted. On a CI checkout the PR's
+        # diff is already committed, so a plain `git stash` has nothing to stash: it
+        # silently no-ops and both the "head" and "base" runs execute the exact same
+        # (already-regressed) code, misclassifying every real regression as
+        # "pre-existing" and passing the check. Fixed by re-staging the PR's diff as an
+        # *uncommitted* change against base-ref before running check_regression: fetch
+        # base-ref, then `git reset` (mixed -- moves HEAD, leaves the working tree alone)
+        # onto it. HEAD now points at base-ref, but the working tree still holds the PR's
+        # file contents, so `git diff HEAD` sees the PR's changes as a real uncommitted
+        # diff and `git stash` has something real to stash. (This also moves what "HEAD"
+        # means, which is why the head SHA is captured as a step output above --
+        # report.ts would otherwise report the reset-to base-ref SHA as both head and
+        # base.)
+        run: |
+          git fetch origin "${{ inputs.base-ref }}" --depth=1
+          git reset "origin/${{ inputs.base-ref }}"
 
       - name: check_regression
         working-directory: target
@@ -105,6 +127,7 @@ jobs:
           TRUST_GATE_API_TOKEN: ${{ secrets.api-token }}
         run: |
           node ../trust-gate/apps/cli/dist-cli/cli.js report \
-            --base-ref "origin/${{ inputs.base-ref }}" \
+            --base-ref HEAD \
+            --head-sha "${{ steps.head-sha.outputs.sha }}" \
             --max-tests "${{ inputs.max-tests }}" \
             --source pr
