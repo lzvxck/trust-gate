@@ -86,6 +86,14 @@ describe('orchestrator e2e: real git repo, real diff, real stash', () => {
     expect(verdict.passToPassFailures).toHaveLength(1);
     expect(verdict.passToPassFailures[0]?.testFile).toBe('src/math.add.test.ts');
 
+    expect(verdict.testResults).toHaveLength(2);
+    expect(verdict.testResults).toContainEqual(
+      expect.objectContaining({ testFile: 'src/math.add.test.ts', status: 'fail' }),
+    );
+    expect(verdict.testResults).toContainEqual(
+      expect.objectContaining({ testFile: 'src/math.sub.test.ts', status: 'pass' }),
+    );
+
     // stash must have been popped -- the regression edit should still be sitting uncommitted.
     const { stdout } = await execFile('git', ['status', '--porcelain'], { cwd: repoRoot });
     expect(stdout).toContain('src/math.ts');

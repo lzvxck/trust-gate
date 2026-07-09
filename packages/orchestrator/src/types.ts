@@ -1,8 +1,8 @@
 import type { BlastRadius } from '@trust-gate/impact';
-import type { TestFailure } from '@trust-gate/test-runner';
+import type { TestCaseResult, TestFailure } from '@trust-gate/test-runner';
 
 export type { BlastRadius } from '@trust-gate/impact';
-export type { TestFailure } from '@trust-gate/test-runner';
+export type { TestCaseResult, TestFailure } from '@trust-gate/test-runner';
 
 export type RegressionStatus = 'pass' | 'fail' | 'error';
 
@@ -14,6 +14,8 @@ export interface RegressionVerdict {
   newFailures: TestFailure[];
   /** Failed on both baseRef and the current working tree -- informational, not gating. */
   preExistingFailures: TestFailure[];
+  /** Full per-test result set from the head run (pass and fail), not just the failure buckets above. */
+  testResults: TestCaseResult[];
   blast: BlastRadius;
   testsRun: number;
   /** Set when status === 'error'. */

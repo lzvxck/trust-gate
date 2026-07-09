@@ -23,7 +23,7 @@ export const regressionEventKindEnum = pgEnum('regression_event_kind', [
 export const repos = pgTable('repos', {
   id: uuid('id').primaryKey().defaultRandom(),
   githubInstallationId: text('github_installation_id'),
-  fullName: text('full_name').notNull(),
+  fullName: text('full_name').notNull().unique(),
   defaultBranch: text('default_branch').notNull().default('main'),
   settings: jsonb('settings_jsonb').notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

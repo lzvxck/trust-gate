@@ -15,3 +15,5 @@ coverage/
 Thumbs.db
 trust-gate-mvp-plan-v2.md
 PROGRESS.md
+*.pem
+.playwright-mcp/

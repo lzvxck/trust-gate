@@ -33,6 +33,7 @@ export async function checkRegression(input: CheckRegressionInput): Promise<Regr
       passToPassFailures: [],
       newFailures: [],
       preExistingFailures: [],
+      testResults: [],
       blast: { affected: [], edges: [], atRiskTests: [], fullSuiteFallback: false },
       testsRun: 0,
     };
@@ -76,6 +77,7 @@ export async function checkRegression(input: CheckRegressionInput): Promise<Regr
     passToPassFailures,
     newFailures,
     preExistingFailures,
+    testResults: headRun.results,
     blast,
     testsRun: testsToRun.length,
   };

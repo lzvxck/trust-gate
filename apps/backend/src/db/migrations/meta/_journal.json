@@ -8,6 +8,13 @@
       "when": 1783558546572,
       "tag": "0000_clear_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783566526619,
+      "tag": "0001_polite_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }
