@@ -1,7 +1,6 @@
 # Trust Gate
 
-Trajectory-aware regression gate for autonomous coding agents. See
-[`trust-gate-mvp-plan-v2.md`](./trust-gate-mvp-plan-v2.md) for the full design.
+Trajectory-aware regression gate for autonomous coding agents.
 
 ## Requirements
 
