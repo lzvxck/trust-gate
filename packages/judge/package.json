@@ -1,0 +1,19 @@
+{
+  "name": "@trust-gate/judge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/dist/**\""
+  },
+  "dependencies": {
+    "openai": "^6.45.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

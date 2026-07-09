@@ -7,15 +7,16 @@
     "trust-gate": "./dist-cli/cli.js"
   },
   "scripts": {
-    "predev": "bun run --cwd ../../packages/core-graph build && bun run --cwd ../../packages/coverage-map build && bun run --cwd ../../packages/impact build && bun run --cwd ../../packages/test-runner build && bun run --cwd ../../packages/orchestrator build",
+    "predev": "bun run --cwd ../../packages/core-graph build && bun run --cwd ../../packages/coverage-map build && bun run --cwd ../../packages/impact build && bun run --cwd ../../packages/test-runner build && bun run --cwd ../../packages/orchestrator build && bun run --cwd ../../packages/judge build",
     "dev": "xmcp dev",
-    "prebuild": "bun run --cwd ../../packages/core-graph build && bun run --cwd ../../packages/coverage-map build && bun run --cwd ../../packages/impact build && bun run --cwd ../../packages/test-runner build && bun run --cwd ../../packages/orchestrator build",
+    "prebuild": "bun run --cwd ../../packages/core-graph build && bun run --cwd ../../packages/coverage-map build && bun run --cwd ../../packages/impact build && bun run --cwd ../../packages/test-runner build && bun run --cwd ../../packages/orchestrator build && bun run --cwd ../../packages/judge build",
     "build": "xmcp build && tsc -p tsconfig.cli.json",
     "postbuild": "node -e \"require('fs').writeFileSync('dist/package.json', JSON.stringify({ type: 'commonjs' }))\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "bun test --pass-with-no-tests"
   },
   "dependencies": {
+    "@trust-gate/judge": "workspace:*",
     "@trust-gate/orchestrator": "workspace:*",
     "xmcp": "^0.6.0",
     "zod": "^4.0.0"

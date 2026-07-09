@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { explainFailure, GROQ_BASE_URL } from '@trust-gate/judge';
 import { checkRegression, getImpactReport } from '@trust-gate/orchestrator';
 import { z } from 'zod';
+import { env } from '../env.js';
 import { summarizeBlast, summarizeVerdict } from './format.js';
 
 /**
@@ -83,6 +85,70 @@ export function registerTools(server: McpServer): void {
         return {
           structuredContent: { error: errorMessage },
           content: [{ type: 'text', text: `get_impact_report failed: ${errorMessage}` }],
+        };
+      }
+    },
+  );
+
+  server.registerTool(
+    'explain_failure',
+    {
+      description:
+        "Given a specific test failure from check_regression (testFile/testName/message/diff), returns an LLM root-cause explanation and a concrete suggested fix. Advisory only. Uses this backend's own configured judge key -- unlike the local stdio server, callers don't need their own.",
+      inputSchema: {
+        testFile: z
+          .string()
+          .describe('Path to the failing test file, as returned by check_regression.'),
+        testName: z.string().describe('Name of the failing test, as returned by check_regression.'),
+        message: z.string().describe('The failure message, as returned by check_regression.'),
+        stack: z.string().optional().describe('The failure stack trace, if available.'),
+        diff: z
+          .string()
+          .describe("The unified diff the test failed against (from check_regression's response)."),
+        reasoningText: z
+          .string()
+          .optional()
+          .describe("The agent's own stated intent for this diff, if it has one to share."),
+      },
+      annotations: {
+        title: 'Explain a test failure',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+    },
+    async ({ testFile, testName, message, stack, diff, reasoningText }) => {
+      if (!env.GROQ_API_KEY || !env.GROQ_MODEL) {
+        return {
+          structuredContent: { error: 'not_configured' },
+          content: [
+            {
+              type: 'text',
+              text: 'explain_failure is not configured on this backend -- GROQ_API_KEY/GROQ_MODEL are not set.',
+            },
+          ],
+        };
+      }
+
+      try {
+        const result = await explainFailure(
+          { apiKey: env.GROQ_API_KEY, model: env.GROQ_MODEL, baseURL: GROQ_BASE_URL },
+          { testFile, testName, message, stack, diff, reasoningText },
+        );
+        return {
+          structuredContent: result as unknown as Record<string, unknown>,
+          content: [
+            {
+              type: 'text',
+              text: `Root cause: ${result.rootCause}\n\nSuggested fix: ${result.suggestedFix}`,
+            },
+          ],
+        };
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        return {
+          structuredContent: { error: errorMessage },
+          content: [{ type: 'text', text: `explain_failure failed: ${errorMessage}` }],
         };
       }
     },

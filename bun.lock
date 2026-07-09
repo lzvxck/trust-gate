@@ -21,6 +21,7 @@
         "@octokit/auth-app": "^8.2.0",
         "@octokit/rest": "^22.0.1",
         "@octokit/webhooks": "^14.2.0",
+        "@trust-gate/judge": "workspace:*",
         "@trust-gate/orchestrator": "workspace:*",
         "bullmq": "^5.34.10",
         "drizzle-orm": "^0.38.4",
@@ -42,6 +43,7 @@
         "trust-gate": "./dist-cli/cli.js",
       },
       "dependencies": {
+        "@trust-gate/judge": "workspace:*",
         "@trust-gate/orchestrator": "workspace:*",
         "xmcp": "^0.6.0",
         "zod": "^4.0.0",
@@ -82,6 +84,16 @@
         "ts-morph": "^24.0.0",
         "typescript": "^5.7.3",
         "vitest": "3.2.4",
+      },
+    },
+    "packages/judge": {
+      "name": "@trust-gate/judge",
+      "version": "0.1.0",
+      "dependencies": {
+        "openai": "^6.45.0",
+      },
+      "devDependencies": {
+        "typescript": "^5.7.3",
       },
     },
     "packages/orchestrator": {
@@ -439,6 +451,8 @@
     "@trust-gate/coverage-map": ["@trust-gate/coverage-map@workspace:packages/coverage-map"],
 
     "@trust-gate/impact": ["@trust-gate/impact@workspace:packages/impact"],
+
+    "@trust-gate/judge": ["@trust-gate/judge@workspace:packages/judge"],
 
     "@trust-gate/orchestrator": ["@trust-gate/orchestrator@workspace:packages/orchestrator"],
 

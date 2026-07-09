@@ -1,7 +1,6 @@
+import { GROQ_BASE_URL } from '@trust-gate/judge';
 import OpenAI from 'openai';
 import { env } from '../env.js';
-
-const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
 
 /** Groq speaks the OpenAI chat-completions wire format -- the official `openai` SDK pointed at Groq's base URL works unmodified. Only constructed when a key is actually configured; callers must check env.GROQ_API_KEY first. */
 export function getJudgeClient(): OpenAI {
