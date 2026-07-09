@@ -1,0 +1,43 @@
+import type { BlastRadius } from '@trust-gate/impact';
+import type { TestFailure } from '@trust-gate/test-runner';
+
+export type { BlastRadius } from '@trust-gate/impact';
+export type { TestFailure } from '@trust-gate/test-runner';
+
+export type RegressionStatus = 'pass' | 'fail' | 'error';
+
+export interface RegressionVerdict {
+  status: RegressionStatus;
+  /** Passed against baseRef, fail on the current working tree -- the gate signal. */
+  passToPassFailures: TestFailure[];
+  /** No counterpart on baseRef (new test file), fails on the current working tree. */
+  newFailures: TestFailure[];
+  /** Failed on both baseRef and the current working tree -- informational, not gating. */
+  preExistingFailures: TestFailure[];
+  blast: BlastRadius;
+  testsRun: number;
+  /** Set when status === 'error'. */
+  errorMessage?: string;
+}
+
+export interface OrchestratorInput {
+  repoRoot: string;
+  baseRef?: string;
+}
+
+export interface CheckRegressionInput extends OrchestratorInput {
+  /** Cap on at-risk tests actually executed. Ignored when the blast radius sets fullSuiteFallback. */
+  maxTests?: number;
+}
+
+/** Thrown by stashAndRun when `git stash pop` fails; the caller's changes remain safely on the stash list. */
+export class StashRestoreError extends Error {
+  constructor(popErrorMessage: string, options?: ErrorOptions) {
+    super(
+      `Failed to restore stashed changes automatically: ${popErrorMessage}\n` +
+        'Your uncommitted changes are safely on the git stash list -- run `git stash pop` manually to restore them.',
+      options,
+    );
+    this.name = 'StashRestoreError';
+  }
+}

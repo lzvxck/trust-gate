@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\""
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\" \"--path-ignore-patterns=**/dist/**\""
   },
   "devDependencies": {
     "typescript": "^5.7.3",

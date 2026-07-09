@@ -6,8 +6,12 @@ build/
 .env.*
 !.env.example
 .next/
+.xmcp/
+dist-cli/
 coverage/
 *.log
+**/__fixtures__/tmp-*
 .DS_Store
 Thumbs.db
 trust-gate-mvp-plan-v2.md
+PROGRESS.md

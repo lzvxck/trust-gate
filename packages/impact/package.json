@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/impact/src/index.js",
+  "types": "./dist/impact/src/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\""
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\" \"--path-ignore-patterns=**/dist/**\""
   },
   "dependencies": {
     "@trust-gate/core-graph": "workspace:*",
