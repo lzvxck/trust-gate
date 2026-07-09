@@ -26,6 +26,9 @@ if (import.meta.main) {
   const { startAnalyzeWorker } = await import('./queue/analyze-worker.js');
   startAnalyzeWorker();
 
+  const { startJudgeWorker } = await import('./queue/judge-worker.js');
+  startJudgeWorker();
+
   const app = await buildServer();
   app.listen({ port: env.PORT, host: env.HOST }).catch((err) => {
     app.log.error(err);

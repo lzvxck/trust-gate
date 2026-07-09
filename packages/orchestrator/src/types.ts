@@ -18,6 +18,8 @@ export interface RegressionVerdict {
   testResults: TestCaseResult[];
   blast: BlastRadius;
   testsRun: number;
+  /** Raw unified diff (`git diff <baseRef>`) this verdict was computed from. Empty string when there were no changes. Consumed by the LLM judge, which needs the actual diff content to compare against trajectory-stated intent -- everything else on this type is derived/summarized. */
+  diff: string;
   /** Set when status === 'error'. */
   errorMessage?: string;
 }

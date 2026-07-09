@@ -3,8 +3,10 @@ import { Worker } from 'bullmq';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { regressionEvents, runs } from '../db/schema.js';
+import { env } from '../env.js';
 import { updateCheckForRun } from '../github/checks.js';
 import { connection } from './connection.js';
+import { enqueueJudge } from './queues.js';
 
 interface AnalyzeJobData {
   runId: string;
@@ -50,6 +52,7 @@ export function startAnalyzeWorker(): Worker<AnalyzeJobData> {
             : 'pass';
       await db.update(runs).set({ status }).where(eq(runs.id, runId));
       await updateCheckForRun(run.repoId, run.headSha, status, verdict);
+      if (env.GROQ_API_KEY) await enqueueJudge(runId);
     },
     { connection },
   );

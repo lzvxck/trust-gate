@@ -14,3 +14,7 @@ export const judgeQueue = new Queue('judge', { connection, defaultJobOptions });
 export async function enqueueAnalyze(runId: string): Promise<void> {
   await analyzeQueue.add('analyze', { runId }, { jobId: runId });
 }
+
+export async function enqueueJudge(runId: string): Promise<void> {
+  await judgeQueue.add('judge', { runId }, { jobId: runId });
+}

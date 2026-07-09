@@ -54,6 +54,7 @@ const runBodySchema = {
           },
         },
         testsRun: { type: 'number' },
+        diff: { type: 'string' },
         errorMessage: { type: 'string' },
       },
     },

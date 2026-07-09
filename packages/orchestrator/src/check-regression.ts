@@ -36,6 +36,7 @@ export async function checkRegression(input: CheckRegressionInput): Promise<Regr
       testResults: [],
       blast: { affected: [], edges: [], atRiskTests: [], fullSuiteFallback: false },
       testsRun: 0,
+      diff: diffText,
     };
   }
 
@@ -80,5 +81,6 @@ export async function checkRegression(input: CheckRegressionInput): Promise<Regr
     testResults: headRun.results,
     blast,
     testsRun: testsToRun.length,
+    diff: diffText,
   };
 }
