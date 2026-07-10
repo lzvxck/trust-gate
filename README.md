@@ -24,6 +24,14 @@ Two entry paths onto the same engine, both landing in one dataset:
   GitHub Actions workflow runs the same engine against the PR, and results post back
   as a real GitHub Check + to a self-hosted dashboard.
 
+## Benchmark
+
+[`BENCHMARK.md`](./BENCHMARK.md) — the union-with-coverage thesis, checked against
+`vitest --changed` on purpose-built fixtures modeling the dynamic-import/DI/registry
+blind spot: **Trust Gate 3/3, `vitest --changed` 0/3** (plus a static-import control
+case both catch, so it isn't just "vitest is broadly worse"). Reproduce it yourself:
+`bun run benchmark`.
+
 ## Self-hosting
 
 Docker Compose brings up the dashboard, API, Postgres, and Redis. See
@@ -77,6 +85,7 @@ packages/
   test-runner/    vitest adapter
   orchestrator/   glue: git diff/stash, ts-morph project loading, ties the above together
   judge/          LLM judge (advisory diff-vs-intent scoring, BYO key)
+  benchmark/      catch-rate benchmark vs `vitest --changed` -- see BENCHMARK.md
 apps/
   cli/            @trust-gate/cli -- CLI + stdio MCP server (agent path)
   backend/        Fastify API, BullMQ workers, GitHub webhooks + Checks API, /mcp over HTTP

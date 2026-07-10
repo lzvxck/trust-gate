@@ -14,7 +14,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "db:migrate": "bun run --cwd apps/backend db:migrate",
-    "db:generate": "bun run --cwd apps/backend db:generate"
+    "db:generate": "bun run --cwd apps/backend db:generate",
+    "benchmark": "bun run --cwd packages/benchmark start"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",

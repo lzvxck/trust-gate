@@ -1,0 +1,20 @@
+{
+  "name": "@trust-gate/benchmark",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun test --pass-with-no-tests \"--path-ignore-patterns=**/__fixtures__/**\" \"--path-ignore-patterns=**/dist/**\" \"--path-ignore-patterns=**/src/fixtures/**\""
+  },
+  "dependencies": {
+    "@trust-gate/orchestrator": "workspace:*",
+    "@trust-gate/test-runner": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "3.2.4",
+    "typescript": "^5.7.3",
+    "vitest": "3.2.4"
+  }
+}
