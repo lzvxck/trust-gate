@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/lzvxck/trust-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/lzvxck/trust-gate/actions/workflows/ci.yml)
 [![Publish Docker images](https://github.com/lzvxck/trust-gate/actions/workflows/publish-images.yml/badge.svg)](https://github.com/lzvxck/trust-gate/actions/workflows/publish-images.yml)
+[![npm](https://img.shields.io/npm/v/@trust-gate/cli.svg)](https://www.npmjs.com/package/@trust-gate/cli)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 
 Trajectory-aware regression gate for autonomous coding agents.
