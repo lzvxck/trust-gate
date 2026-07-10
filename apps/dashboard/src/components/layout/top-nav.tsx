@@ -13,6 +13,9 @@ export function TopNav() {
           <Link href="/runs" className="text-body-md text-body">
             Runs
           </Link>
+          <Link href="/repos" className="text-body-md text-body">
+            Repos
+          </Link>
         </div>
         <UserMenu />
       </div>

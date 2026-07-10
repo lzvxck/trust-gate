@@ -167,4 +167,54 @@ export function registerRunsRoute(app: FastifyInstance): void {
       return reply.send({ run });
     },
   );
+
+  const TERMINAL_STATUSES = new Set(['pass', 'fail', 'error']);
+  const POLL_INTERVAL_MS = 2000;
+
+  app.get<{ Params: { id: string } }>(
+    '/runs/:id/stream',
+    { preHandler: requireBearerToken },
+    async (request, reply) => {
+      const run = await db.query.runs.findFirst({ where: eq(runs.id, request.params.id) });
+      if (!run) return reply.code(404).send({ error: 'Run not found' });
+
+      reply.hijack();
+      reply.raw.writeHead(200, {
+        'content-type': 'text/event-stream',
+        'cache-control': 'no-cache',
+        connection: 'keep-alive',
+      });
+
+      let lastStatus: string | null = null;
+      const send = (status: string) => {
+        reply.raw.write(`data: ${JSON.stringify({ status })}\n\n`);
+      };
+
+      const tick = async () => {
+        const current = await db.query.runs.findFirst({
+          where: eq(runs.id, request.params.id),
+          columns: { status: true },
+        });
+        if (!current) return;
+        if (current.status !== lastStatus) {
+          lastStatus = current.status;
+          send(current.status);
+        }
+        if (TERMINAL_STATUSES.has(current.status)) {
+          clearInterval(interval);
+          reply.raw.end();
+        }
+      };
+
+      send(run.status);
+      lastStatus = run.status;
+      if (TERMINAL_STATUSES.has(run.status)) {
+        reply.raw.end();
+        return;
+      }
+
+      const interval = setInterval(tick, POLL_INTERVAL_MS);
+      request.raw.on('close', () => clearInterval(interval));
+    },
+  );
 }

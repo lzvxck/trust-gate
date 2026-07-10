@@ -1,6 +1,8 @@
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { ImpactGraph } from '@/components/impact-graph';
+import { LiveRunStatus } from '@/components/live-run-status';
 import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import type { RunStatus } from '@/lib/api';
@@ -47,7 +49,10 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
             &middot; {new Date(run.createdAt).toLocaleString()}
           </p>
         </div>
-        <Badge variant={STATUS_BADGE[run.status]}>{run.status.toUpperCase()}</Badge>
+        <div className="flex flex-col items-end gap-2">
+          <Badge variant={STATUS_BADGE[run.status]}>{run.status.toUpperCase()}</Badge>
+          <LiveRunStatus runId={run.id} initialStatus={run.status} />
+        </div>
       </div>
 
       <Card variant={VERDICT_CARD[run.status]} className="mt-8">
@@ -59,6 +64,22 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
           <p className="mt-2 text-body-sm">{run.verdict.errorMessage}</p>
         ) : null}
       </Card>
+
+      {run.verdict?.diff && run.impactEdges.length > 0 ? (
+        <section className="mt-8">
+          <h2 className="text-title-sm text-ink">Impact graph</h2>
+          <p className="mt-1 text-body-sm text-muted">
+            Blast radius: the changed file(s), what reaches them, and the tests at risk.
+          </p>
+          <div className="mt-3">
+            <ImpactGraph
+              edges={run.impactEdges}
+              atRiskTests={run.atRiskTests}
+              diff={run.verdict.diff}
+            />
+          </div>
+        </section>
+      ) : null}
 
       {run.verdict && run.verdict.passToPassFailures.length > 0 ? (
         <section className="mt-8">

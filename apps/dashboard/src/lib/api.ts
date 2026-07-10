@@ -1,9 +1,16 @@
 import { env } from './env';
 
+export interface RepoSettings {
+  /** testFile paths flagged as flaky. Not yet consumed by check_regression's scoring --
+   * see packages/impact's `flakiness` option -- this only persists the list today. */
+  flakyTests?: string[];
+}
+
 export interface Repo {
   id: string;
   fullName: string;
   defaultBranch: string;
+  settings?: RepoSettings;
   createdAt: string;
 }
 
@@ -74,6 +81,26 @@ export interface JudgeResult {
   model: string;
 }
 
+export type ImpactEdgeKind = 'imports' | 'calls' | 'covers';
+
+export interface ImpactEdge {
+  id: string;
+  fromSymbol: string;
+  toSymbol: string;
+  kind: ImpactEdgeKind;
+  weight: number;
+}
+
+export type RegressionEventKind = 'pass_to_pass' | 'new_fail';
+
+export interface RegressionEvent {
+  id: string;
+  testFile: string;
+  testName: string;
+  kind: RegressionEventKind;
+  detectedAt: string;
+}
+
 export interface RunDetail {
   id: string;
   repoId: string;
@@ -85,9 +112,11 @@ export interface RunDetail {
   createdAt: string;
   repo: Repo;
   trajectories: Trajectory[];
+  impactEdges: ImpactEdge[];
   atRiskTests: AtRiskTest[];
   testResults: TestResult[];
   judgeResults: JudgeResult[];
+  regressionEvents: RegressionEvent[];
 }
 
 async function backendFetch<T>(path: string): Promise<T> {
@@ -130,4 +159,47 @@ export async function getRun(id: string): Promise<RunDetail | null> {
   if (!res.ok) throw new Error(`Backend request failed: /runs/${id} -> ${res.status}`);
   const { run } = await res.json();
   return run;
+}
+
+export async function getRepo(id: string): Promise<Repo | null> {
+  const res = await fetch(`${env.BACKEND_URL}/repos/${id}`, {
+    headers: { Authorization: `Bearer ${env.BACKEND_API_TOKEN}` },
+    cache: 'no-store',
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Backend request failed: /repos/${id} -> ${res.status}`);
+  const { repo } = await res.json();
+  return repo;
+}
+
+export interface UpdateRepoInput {
+  defaultBranch?: string;
+  settings?: RepoSettings;
+}
+
+export async function updateRepo(id: string, input: UpdateRepoInput): Promise<Repo> {
+  const res = await fetch(`${env.BACKEND_URL}/repos/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${env.BACKEND_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(`Backend request failed: PATCH /repos/${id} -> ${res.status}`);
+  const { repo } = await res.json();
+  return repo;
+}
+
+export interface RegressionDayBucket {
+  date: string;
+  passToPass: number;
+  newFail: number;
+}
+
+export async function getRepoRegressions(id: string): Promise<RegressionDayBucket[]> {
+  const { series } = await backendFetch<{ series: RegressionDayBucket[] }>(
+    `/repos/${id}/regressions`,
+  );
+  return series;
 }
