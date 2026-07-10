@@ -1,9 +1,8 @@
 # Publishing @trust-gate/cli to npm
 
-Not yet published. Publishing itself needs an npm account with access to the
-`@trust-gate` org, which isn't something that can be done from here — this is
-the runbook for when that happens. Both real blockers found while preparing this
-are now resolved and verified:
+Published: [`@trust-gate/cli`](https://www.npmjs.com/package/@trust-gate/cli), currently
+`0.1.0`. This doc is kept as the runbook for future releases. Both real blockers found
+while preparing the first publish are resolved and verified:
 
 ## Blocker 1 (fixed): the name `trust-gate` is squatted
 
@@ -14,11 +13,9 @@ to **`@trust-gate/cli`**, matching the existing internal workspace scope
 independent of the package name), so usage (`trust-gate report`) and docs don't
 change once installed.
 
-**Still needs verifying before publishing** (can't be checked from here — no way
-to confirm npm org availability without an authenticated npm session): confirm
-the `@trust-gate` org itself is claimable via `npm org create trust-gate` or
-`https://www.npmjs.com/org/create`. If it's taken, the rename needs to go one
-level further (e.g. `@trustgate-run/cli`, `trustgate-cli` unscoped).
+**Verified**: the `@trust-gate` org was unclaimed and is now created. Note the npm
+CLI has no `org create` subcommand (`npm org set/ls/rm` only manage an *existing*
+org) — creation is web-UI only, at `https://www.npmjs.com/org/create`.
 
 ## Blocker 2 (fixed): `report` wasn't actually self-contained
 
@@ -51,20 +48,29 @@ Deferred, not required to unblock the CLI: publishing `packages/*` as their own
 public `@trust-gate/*` packages too, which would also match the original
 Apache-2.0 "embed the engine directly" adoption goal from the plan.
 
-## Checklist, once the org is confirmed
+## Checklist (done for `0.1.0`)
 
-1. `apps/cli/package.json`: remove `"private": true`, add `"publishConfig": { "access": "public" }`
+1. ✅ `apps/cli/package.json`: removed `"private": true`, added `"publishConfig": { "access": "public" }`
    (scoped packages default to requiring a paid private registry unless this is set),
-   add `description`, `repository`, `homepage`, `keywords` (`license` is already set).
-2. Add a `"files"` field (or `.npmignore`) so only `dist-cli/` and `dist/` ship —
+   `description`, `repository`, `homepage`, `keywords` (`license` was already set).
+2. ✅ Added a `"files"` field (`["dist-cli", "dist"]`) so only the build output ships —
    not `src/`.
-3. `bun run --cwd apps/cli build`, then `cd apps/cli && npm pack --dry-run` —
-   inspect the tarball contents before publishing anything.
-4. `npm login`, then `npm publish --access public` from `apps/cli/`.
-5. Verify from *outside* this repo: `npx -y @trust-gate/cli mcp` in a scratch
-   directory with no local clone.
-6. Drop the "not published yet" caveats in this repo: `docs/03-agent-setup.md`,
+3. ✅ `bun run --cwd apps/cli build`, then `cd apps/cli && npm pack --dry-run` —
+   inspected the tarball (7 files, ~2.9MB packed) before publishing anything.
+4. ✅ `npm publish --access public` from `apps/cli/`.
+   **Gotcha**: a plain `npm login`-issued token couldn't complete the account's 2FA
+   challenge for publish (hard `403`, no OTP prompt ever appeared, even with a fresh
+   `--otp=...`) — this looked like the standard "enter your OTP" flow but wasn't.
+   Fixed by generating a **granular access token** on npmjs.com (Read and write,
+   scoped to the `@trust-gate` packages) and pointing npm at it for just this one
+   publish via `--userconfig=<path-to-a-throwaway-.npmrc>` (a project-local `.npmrc`
+   inside a bun/npm workspace member gets silently ignored — `npm warn config
+   ignoring workspace config` — so it has to live outside the workspace tree).
+   The throwaway config file was deleted immediately after.
+5. ✅ Verified from *outside* this repo: `npx -y @trust-gate/cli --help` in a scratch
+   directory with no local clone — resolved and ran correctly.
+6. ✅ Dropped the "not published yet" caveats in this repo: `docs/03-agent-setup.md`,
    root `README.md`, `.github/workflows/regression-check.yml`'s comment.
-7. Optional follow-up: a release GitHub Actions workflow (`npm publish` on a git
-   tag push, `NPM_TOKEN` as a repo secret) so this doesn't stay a manual step
-   forever.
+7. Optional follow-up, still open: a release GitHub Actions workflow (`npm publish`
+   on a git tag push, `NPM_TOKEN` as a repo secret — would need to be a granular
+   token per the gotcha above) so future releases don't stay a manual step.

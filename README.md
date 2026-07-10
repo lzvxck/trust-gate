@@ -56,8 +56,8 @@ For a real (non-localhost) deployment, put a reverse proxy in front for TLS — 
 
 ## Connecting an agent (MCP path)
 
-`@trust-gate/cli` isn't on npm yet (see [`docs/publishing-cli.md`](./docs/publishing-cli.md)),
-so build it from this repo for now — see [`docs/03-agent-setup.md`](./docs/03-agent-setup.md).
+`@trust-gate/cli` is on npm — `npx -y @trust-gate/cli mcp`, no local clone needed. See
+[`docs/03-agent-setup.md`](./docs/03-agent-setup.md) for MCP config.
 
 ## Developing on this repo
 

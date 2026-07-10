@@ -1,11 +1,32 @@
 {
   "name": "@trust-gate/cli",
   "version": "0.1.0",
-  "private": true,
+  "description": "Trajectory-aware regression gate for autonomous coding agents -- CLI + stdio MCP server",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lzvxck/trust-gate.git",
+    "directory": "apps/cli"
+  },
+  "homepage": "https://github.com/lzvxck/trust-gate#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "regression-testing",
+    "coding-agent",
+    "ai-agent",
+    "test-impact-analysis"
+  ],
   "type": "module",
   "bin": {
-    "trust-gate": "./dist-cli/cli.js"
+    "trust-gate": "dist-cli/cli.js"
+  },
+  "files": [
+    "dist-cli",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "predev": "bun run --cwd ../../packages/core-graph build && bun run --cwd ../../packages/coverage-map build && bun run --cwd ../../packages/impact build && bun run --cwd ../../packages/test-runner build && bun run --cwd ../../packages/orchestrator build && bun run --cwd ../../packages/judge build",

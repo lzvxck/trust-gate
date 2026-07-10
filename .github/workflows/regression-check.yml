@@ -11,9 +11,10 @@ name: Trust Gate Regression Check
 # satisfies "open a PR -> check turns red on a real pass-to-pass regression" using
 # GitHub's native required-status-checks.
 #
-# @trust-gate/cli isn't published to npm yet (deferred, see PROGRESS.md), so the only
-# way to run it from another repo today is to check out this repo's source and build
-# it -- once it's on npm this can collapse to a single `npx @trust-gate/cli report`.
+# @trust-gate/cli is published on npm, but this workflow still checks out
+# `trust-gate-ref` and builds from source rather than `npx @trust-gate/cli report`,
+# so callers can pin/override the engine version independently of whatever's
+# latest on npm (see the trust-gate-ref input above).
 # See deploy/github-actions/example-caller.yml for how a consuming repo wires this up.
 
 on:
